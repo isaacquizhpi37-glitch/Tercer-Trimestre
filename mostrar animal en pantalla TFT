@@ -1,0 +1,89 @@
+#include <TFT_eSPI.h>
+#include <math.h>
+
+TFT_eSPI tft = TFT_eSPI();
+
+// Colores
+#define BODY 0xFD20
+#define EAR  0xF4A0
+#define MANE 0xA145
+#define SPOT 0xC860
+#define BLACK TFT_BLACK
+#define WHITE TFT_WHITE
+#define SKY   0x867D   // cielo
+#define GRASS 0x07E0   // verde
+
+int xPos = 0;
+int dir = 1;
+int anim = 0;
+
+void drawLion(int x, int y, int bounce);
+
+void setup() {
+  tft.init();
+  tft.setRotation(3);
+  tft.fillScreen(SKY);
+}
+
+void loop() {
+  // Movimiento lateral
+  xPos += dir * 2;
+
+  if (xPos > tft.width() - 80) dir = -1;
+  if (xPos < 0) dir = 1;
+
+  int bounce = sin(anim * 0.2) * 3;
+
+  // Fondo (cielo)
+  tft.fillRect(0, 0, tft.width(), tft.height(), SKY);
+
+  // Base (suelo)
+  tft.fillRect(0, tft.height() - 40, tft.width(), 40, GRASS);
+
+  // Dibujar león
+  drawLion(xPos, tft.height() - 60 + bounce, bounce);
+
+  anim++;
+  delay(30);
+}
+
+void drawLion(int x, int y, int bounce) {
+
+  // Melena
+  tft.fillCircle(x + 50, y - 30, 30, MANE);
+
+  // Cabeza
+  tft.fillCircle(x + 50, y - 30, 20, BODY);
+
+  // Orejas
+  tft.fillCircle(x + 35, y - 45, 8, EAR);
+  tft.fillCircle(x + 65, y - 45, 8, EAR);
+
+  // Ojos
+  tft.fillCircle(x + 45, y - 35, 4, WHITE);
+  tft.fillCircle(x + 55, y - 35, 4, WHITE);
+  tft.fillCircle(x + 45, y - 35, 2, BLACK);
+  tft.fillCircle(x + 55, y - 35, 2, BLACK);
+
+  // Nariz
+  tft.fillCircle(x + 50, y - 25, 3, BLACK);
+
+  // Cuerpo
+  tft.fillEllipse(x + 20, y, 30, 20, BODY);
+
+  // Manchas
+  tft.fillCircle(x + 10, y, 5, SPOT);
+  tft.fillCircle(x + 25, y + 5, 4, SPOT);
+
+  // Patas animadas (simulan caminar)
+  int legMove = sin(anim * 0.3) * 3;
+
+  tft.fillRect(x + 5, y + 10 + legMove, 6, 15, BODY);
+  tft.fillRect(x + 20, y + 10 - legMove, 6, 15, BODY);
+
+  // Cola animada
+  int tailMove = sin(anim * 0.3) * 8;
+
+  tft.drawLine(x + 40, y - 5, x + 55, y - 15 + tailMove, MANE);
+  tft.fillCircle(x + 55, y - 15 + tailMove, 4, MANE);
+}
